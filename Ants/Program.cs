@@ -1,57 +1,93 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using SimplexNoise;
 
 namespace Ants
 {
-    class Program
+    internal class Program
     {
-        private static List<Ant> _antsList;
+        public static List<Ant> AntsList;
+        public static List<FoodSource> FoodSources;
+
         public static RenderWindow window;
         public const int WindowWidth = 800;
         public const int WindowHeight = 600;
-        static void Main(string[] args)
+        public static bool Debug = false;
+
+        private static void Main(string[] args)
         {
-            _antsList = new List<Ant>();
+            AntsList = new List<Ant>();
+            FoodSources = new List<FoodSource>();
             GenerateAnts(10);
-            // var window = new Window(new VideoMode(800, 600), "My window");
+            GenerateFoodSources(3);
             window = new RenderWindow(new VideoMode(WindowWidth, WindowHeight), "My window");
-            window.Closed += new EventHandler(OnClose);
-            window.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(MouseButtonPressed);
+            window.Closed += OnClose;
+            window.MouseButtonPressed += MouseButtonPressed;
+            window.SetFramerateLimit(30);
 
             while (window.IsOpen)
             {
                 window.Clear();
-                foreach (var ant in _antsList)
+
+                foreach (var foodSource in FoodSources)
+                {
+                    foreach (var food in foodSource.Foods)
+                    {
+                        window.Draw(food.Shape);
+                    }
+                }
+
+                foreach (var ant in AntsList)
                 {
                     ant.Move();
                     window.Draw(ant.Sprite);
+
+                    if (Debug)
+                    {
+                        var targetPosition = ant.targetPosition;
+                        var targetShape = new RectangleShape(new Vector2f(10, 10));
+                        targetShape.Position = targetPosition;
+                        window.Draw(targetShape);
+                    }
                 }
+
+                AntsList[0].debug = false;
+
                 window.DispatchEvents();
                 window.Display();
             }
         }
 
-        static void OnClose(object sender, EventArgs e)
+        private static void OnClose(object sender, EventArgs e)
         {
             Console.WriteLine("\n\nExiting...\n\n");
             window.Close();
         }
 
-        static void MouseButtonPressed(object sender, MouseButtonEventArgs mouse)
+        private static void MouseButtonPressed(object sender, MouseButtonEventArgs mouse)
         {
-            _antsList.Add(new Ant(mouse.X, mouse.Y));
+            AntsList.Add(new Ant(mouse.X, mouse.Y));
             Console.WriteLine("\nMouse Button Pressed!\n");
         }
 
-        static void GenerateAnts(int count)
+        private static void GenerateAnts(int count)
         {
             for (var i = 0; i < count; i++)
             {
-                _antsList.Add(new Ant());
+                AntsList.Add(new Ant());
+            }
+        }
+
+        private static void GenerateFoodSources(int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                FoodSources.Add(new FoodSource());
             }
         }
     }

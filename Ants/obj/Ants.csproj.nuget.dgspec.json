@@ -47,6 +47,10 @@
             "SFML.Net": {
               "target": "Package",
               "version": "[2.5.0, )"
+            },
+            "SimplexNoise": {
+              "target": "Package",
+              "version": "[2.0.0, )"
             }
           },
           "imports": [
